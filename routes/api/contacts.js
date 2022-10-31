@@ -23,7 +23,6 @@ const schema = Joi.object({
 contactsRouter.get('/', async (req, res, next) => {
   try {
     const allContacts = await contacts.listContacts();
-    console.log(contacts);
     res.json(allContacts);
   } catch (err) {
     next(err);
@@ -33,7 +32,6 @@ contactsRouter.get('/', async (req, res, next) => {
 contactsRouter.get('/:contactId', async (req, res, next) => {
   try {
     const { contactId } = req.params;
-    console.log(req.params);
     const contact = await contacts.getContactById(contactId);
     if (!contact) {
       throw createError(404, "Not found");
