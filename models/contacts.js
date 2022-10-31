@@ -7,14 +7,12 @@ const contactsPath = path.join(__dirname, "./contacts.json");
 
 const listContacts = async () => {
   const contactsRaw = await fs.readFile(contactsPath, 'utf8');
-  const contacts = JSON.parse(contactsRaw);
-  return contacts;
+  return JSON.parse(contactsRaw);;
 }
 
 const getContactById = async (contactId) => {
   const allContacts = await listContacts();
-  const contact = allContacts.find(contact => contact.id === contactId);
-  return contact;
+  return allContacts.find(contact => contact.id === contactId);;
 }
 
 const removeContact = async (contactId) => {
