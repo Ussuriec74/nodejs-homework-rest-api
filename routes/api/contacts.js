@@ -88,5 +88,5 @@ contactsRouter.put('/:contactId', async (req, res, next) => {
 });
 
 module.exports = {
-  contactsRouter,
+  contactsRouter
 }
