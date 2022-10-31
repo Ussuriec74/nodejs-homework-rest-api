@@ -23,6 +23,7 @@ const schema = Joi.object({
 contactsRouter.get('/', async (req, res, next) => {
   try {
     const allContacts = await contacts.listContacts();
+    console.log(contacts);
     res.json(allContacts);
   } catch (err) {
     next(err);
@@ -31,8 +32,9 @@ contactsRouter.get('/', async (req, res, next) => {
 
 contactsRouter.get('/:contactId', async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const contact = await contacts.getContactById(id);
+    const { contactId } = req.params;
+    console.log(req.params);
+    const contact = await contacts.getContactById(contactId);
     if (!contact) {
       throw createError(404, "Not found");
     }
@@ -58,8 +60,8 @@ contactsRouter.post('/', async (req, res, next) => {
 
 contactsRouter.delete('/:contactId', async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const contact = await contacts.removeContact(id);
+    const { contactId } = req.params;
+    const contact = await contacts.removeContact(contactId);
     if (!contact) {
       throw createError(404, "Not found");
     }
@@ -76,8 +78,8 @@ contactsRouter.put('/:contactId', async (req, res, next) => {
       throw createError(400, error.message);
     }
     const { name, email, phone } = req.body;
-    const { id } = req.params;
-    const contact = await contacts.updateContact(id, name, email, phone);
+    const { contactId } = req.params;
+    const contact = await contacts.updateContact(contactId, name, email, phone);
     if (!contact) {
       throw createError(404, "Not found");
     }
@@ -87,6 +89,5 @@ contactsRouter.put('/:contactId', async (req, res, next) => {
   }
 });
 
-module.exports = {
-  contactsRouter
-}
+module.exports = contactsRouter;
+
