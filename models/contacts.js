@@ -26,7 +26,7 @@ const removeContact = async (contactId) => {
   return removedContact;
 }
 
-const addContact = async ({name, email, phone}) => {
+const addContact = async (name, email, phone) => {
   const id = nanoid();
   const newContact = {
     id,
