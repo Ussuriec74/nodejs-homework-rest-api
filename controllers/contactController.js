@@ -25,7 +25,7 @@ const removeContact = async (req, res, next) => {
   const contact = await Contact.findById(id);
   if (contact) {
     await Contact.findByIdAndDelete(id);
-    return res.status(204).json( contact );
+    return res.status(204).json(contact);
   }
   return next(createError(404, "Not found"));
 }

@@ -13,5 +13,4 @@ contactsRouter.delete("/:id", tryCatchWrapper(contactController.removeContact));
 contactsRouter.put("/:id", validateRequest(schemaCreate), tryCatchWrapper(contactController.updateContact));
 contactsRouter.patch("/:id/favorite", validateRequest(schemaPatch), tryCatchWrapper(contactController.updateStatusContact));
 
-
-module.exports = {contactsRouter };
+module.exports = contactsRouter ;
