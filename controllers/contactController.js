@@ -8,7 +8,10 @@ const listContacts = async (req, res, next) => {
 
 const getContactById = async (req, res, next) => {
   const { id } = req.params;
-  const contact = await Contact.findById(id);
+  const contact = await Contact.findById(id).catch((err) => {
+    console.error(err);
+    return null;
+  });
   if (contact) {
     return res.json( contact );
   }
@@ -22,7 +25,10 @@ const addContact = async (req, res, next) => {
 
 const removeContact = async (req, res, next) => {
   const { id } = req.params;
-  const contact = await Contact.findById(id);
+  const contact = await Contact.findById(id).catch((err) => {
+    console.error(err);
+    return null;
+  });
   if (contact) {
     await Contact.findByIdAndDelete(id);
     return res.status(204).json(contact);
@@ -32,7 +38,10 @@ const removeContact = async (req, res, next) => {
 
 const updateContact = async (req, res, next) => {
   const { id } = req.params;
-  const contact = await Contact.findById(id);
+  const contact = await Contact.findById(id).catch((err) => {
+    console.error(err);
+    return null;
+  });
   if (contact) {
     const updatedContact = await Contact.findByIdAndUpdate(id, req.body, { new: true });
     return res.json( updatedContact );
@@ -45,7 +54,10 @@ const updateStatusContact = async (req, res, next) => {
   if (!req.body) {
     return next(createError(400, "missing field favorite"));
   }
-  const contact = await Contact.findById(id);
+  const contact = await Contact.findById(id).catch((err) => {
+    console.error(err);
+    return null;
+  });
   if (contact) {
     const updatedContact = await Contact.findByIdAndUpdate(id, req.body, { new: true });
     return res.json( updatedContact );
