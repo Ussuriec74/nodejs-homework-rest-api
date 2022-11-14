@@ -5,16 +5,23 @@ const { User } = require('../models/userModel');
 const { JWT_SECRET } = process.env;
 
 const auth = async (req, res, next) => {
-  const authHeader = req.headers.authorization || "";
-  const [tokenType, token] = authHeader.split(" ");
+
+  const { authorization = "" } = req.headers;
+  const [tokenType, token] = authorization.split(" ");
 
   if (tokenType === "Bearer" && token) {
     try {
       const verifiedToken = jwt.verify(token, JWT_SECRET);
       const user = await User.findById(verifiedToken._id);
+
+      
       if (!user) {
         next(new Unauthorized("Not authorized"));
       }
+      
+      req.user = user;
+
+      return next();
 
     } catch(error) {
       if (error.name === "TokenExpiredError") {
@@ -28,7 +35,7 @@ const auth = async (req, res, next) => {
     }
   }
 
-  return next(new Unauthorized());
+  return next(new Unauthorized("Not authorized"));
 }
 
 module.exports = { auth };

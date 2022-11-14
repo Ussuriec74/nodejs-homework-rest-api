@@ -29,7 +29,7 @@ const signupUser = async (req, res, next) => {
   });
 }
 
-const signinUser = async (req, res,) => {
+const loginUser = async (req, res,) => {
   const { email, password } = req.body;
 
   const user = await User.findOne({ email });
@@ -53,4 +53,29 @@ const signinUser = async (req, res,) => {
   });
 }
 
-module.exports = { signupUser, signinUser };
+const getCurrentUser = async (req, res, next) => {
+  const { user } = req;
+  const currentUser = await User.findOne(user._id);
+
+  return res.json({
+    email: currentUser.email,
+    subscription: currentUser.subscription,
+  });
+}
+
+const logoutUser = async (req, res, next) => {
+
+  const { user } = req;
+  user.token = null;
+
+  await User.findByIdAndUpdate(user._id, user);
+
+  return res.sendStatus(204);
+}
+
+module.exports = {
+  signupUser,
+  loginUser,
+  logoutUser,
+  getCurrentUser,
+};
