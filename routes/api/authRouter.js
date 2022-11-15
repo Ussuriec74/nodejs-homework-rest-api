@@ -9,7 +9,7 @@ const usersRouter = express.Router();
 
 usersRouter.post("/signup", validateRequest(schemaUserRegister), tryCatchWrapper(authController.signupUser));
 usersRouter.post("/login", validateRequest(schemUserLogin), tryCatchWrapper(authController.loginUser));
-usersRouter.post("/logout", tryCatchWrapper(auth), tryCatchWrapper(authController.logoutUser));
+usersRouter.get("/logout", tryCatchWrapper(auth), tryCatchWrapper(authController.logoutUser));
 usersRouter.get("/current", tryCatchWrapper(auth), tryCatchWrapper(authController.getCurrentUser));
 
 module.exports = usersRouter;
