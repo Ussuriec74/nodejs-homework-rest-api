@@ -13,6 +13,7 @@ async function main() {
     console.log(`Server is on ${PORT}`);
   } catch(err) {
     console.error("Error:", err.message);
+    process.exit(1);
   }
 }
 main();
