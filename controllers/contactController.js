@@ -2,8 +2,11 @@ const { Contact } = require('../models/contactModel');
 const { createError } = require('../helpers');
 
 const listContacts = async (req, res, next) => {
-  const contacts = await Contact.find();
-      return res.json( contacts );
+  const { limit, page } = req.query;
+  const skip = (page - 1) * limit;
+
+  const contacts = await Contact.find().skip(skip).limit(limit);
+    return res.json( contacts );
 }
 
 const getContactById = async (req, res, next) => {
