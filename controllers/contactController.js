@@ -1,20 +1,21 @@
-const { Contact } = require('../models/contactModel');
+const contacts = require('../servises/contactsServis');
 const { createError } = require('../helpers');
 
 const listContacts = async (req, res, next) => {
-  const { limit, page } = req.query;
-  const skip = (page - 1) * limit;
+  const { _id } = req.user;
+  console.log(_id);
+  const allContacts = await contacts.getAllContact(req.query, _id);
 
-  const contacts = await Contact.find().skip(skip).limit(limit);
-    return res.json( contacts );
+    return res.json( allContacts );
 }
 
 const getContactById = async (req, res, next) => {
   const { id } = req.params;
-  const contact = await Contact.findById(id).catch((err) => {
+  const contact = await contacts.getById(id).catch((err) => {
     console.error(err);
     return null;
   });
+
   if (contact) {
     return res.json( contact );
   }
@@ -22,32 +23,39 @@ const getContactById = async (req, res, next) => {
 }
 
 const addContact = async (req, res, next) => {
-  const createdContact = await Contact.create(req.body);
-  return res.status(201).json( createdContact );
+  try {
+    const _id = req.user;
+    const createdContact = await contacts.createContact(req.body, _id);
+    return res.status(201).json( createdContact );
+  } catch (err) {
+    if (err.message.includes('duplicate')) {
+      err.status = 400;
+    }
+    next(err);
+  }
 }
 
 const removeContact = async (req, res, next) => {
   const { id } = req.params;
-  const contact = await Contact.findById(id).catch((err) => {
+  const contact = await contacts.deleteById(id).catch((err) => {
     console.error(err);
     return null;
   });
   if (contact) {
-    await Contact.findByIdAndDelete(id);
     return res.status(204).json(contact);
   }
   return next(createError(404, "Not found"));
 }
 
+
 const updateContact = async (req, res, next) => {
   const { id } = req.params;
-  const contact = await Contact.findById(id).catch((err) => {
+  const contact = await contacts.updateById(id, req.body).catch((err) => {
     console.error(err);
     return null;
   });
   if (contact) {
-    const updatedContact = await Contact.findByIdAndUpdate(id, req.body, { new: true });
-    return res.json( updatedContact );
+    return res.json(contact);
   }
   return next(createError(404, "Not found"));
 }
@@ -57,13 +65,12 @@ const updateStatusContact = async (req, res, next) => {
   if (!req.body) {
     return next(createError(400, "missing field favorite"));
   }
-  const contact = await Contact.findById(id).catch((err) => {
+  const contact = await contacts.updateById(id, req.body).catch((err) => {
     console.error(err);
     return null;
   });
   if (contact) {
-    const updatedContact = await Contact.findByIdAndUpdate(id, req.body, { new: true });
-    return res.json( updatedContact );
+    return res.json(contact);
   }
   return next(createError(404, "Not found"));
 }

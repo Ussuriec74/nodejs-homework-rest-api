@@ -2,16 +2,18 @@ const { User } = require('../models/userModel');
 const { Conflict, Unauthorized } = require('http-errors');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const gravatar = require('gravatar');
 
 const { JWT_SECRET } = process.env;
 
 const signupUser = async (req, res, next) => {
   const { email, password } = req.body;
 
+  const url = await gravatar.url(`${email}`, {s: '100', r: 'x', d: 'retro'}, false);
   const salt = await bcrypt.genSalt();
   const hashedPassword = await bcrypt.hash(password, salt);
 
-  const user = new User({ email, password: hashedPassword });
+  const user = new User({ email, password: hashedPassword, avatarURL: url });
   try {
     await user.save();
   } catch(error) {
@@ -20,7 +22,6 @@ const signupUser = async (req, res, next) => {
     }
     throw error;
   }
-
   return res.status(201).json({
     user: {
       email: user.email,
