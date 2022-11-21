@@ -2,16 +2,16 @@ const contacts = require('../servises/contactsServis');
 const { createError } = require('../helpers');
 
 const listContacts = async (req, res, next) => {
-  const { _id } = req.user;
-  console.log(_id);
-  const allContacts = await contacts.getAllContact(req.query, _id);
+  const { _id: userId } = req.user;
+  const allContacts = await contacts.getAllContact(req.query, userId);
 
     return res.json( allContacts );
 }
 
 const getContactById = async (req, res, next) => {
-  const { id } = req.params;
-  const contact = await contacts.getById(id).catch((err) => {
+  const { id: contactId } = req.params;
+  const { _id: userId } = req.user;
+  const contact = await contacts.getById(contactId, userId).catch((err) => {
     console.error(err);
     return null;
   });
@@ -24,8 +24,8 @@ const getContactById = async (req, res, next) => {
 
 const addContact = async (req, res, next) => {
   try {
-    const _id = req.user;
-    const createdContact = await contacts.createContact(req.body, _id);
+    const { _id: userId } = req.user;
+    const createdContact = await contacts.createContact(req.body, userId);
     return res.status(201).json( createdContact );
   } catch (err) {
     if (err.message.includes('duplicate')) {
@@ -36,8 +36,9 @@ const addContact = async (req, res, next) => {
 }
 
 const removeContact = async (req, res, next) => {
-  const { id } = req.params;
-  const contact = await contacts.deleteById(id).catch((err) => {
+  const { id: contactId } = req.params;
+  const { _id: userId } = req.user;
+  const contact = await contacts.deleteById(contactId, userId).catch((err) => {
     console.error(err);
     return null;
   });
@@ -49,8 +50,9 @@ const removeContact = async (req, res, next) => {
 
 
 const updateContact = async (req, res, next) => {
-  const { id } = req.params;
-  const contact = await contacts.updateById(id, req.body).catch((err) => {
+  const { id: contactId } = req.params;
+  const { _id: userId } = req.user;
+  const contact = await contacts.updateById(contactId, req.body, userId).catch((err) => {
     console.error(err);
     return null;
   });
@@ -61,11 +63,12 @@ const updateContact = async (req, res, next) => {
 }
 
 const updateStatusContact = async (req, res, next) => {
-  const { id } = req.params;
+  const { id: contactId } = req.params;
+  const { _id: userId } = req.user;
   if (!req.body) {
     return next(createError(400, "missing field favorite"));
   }
-  const contact = await contacts.updateById(id, req.body).catch((err) => {
+  const contact = await contacts.updateById(contactId, req.body, userId).catch((err) => {
     console.error(err);
     return null;
   });
