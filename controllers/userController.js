@@ -93,7 +93,7 @@ resize();
 
   await User.findByIdAndUpdate(user._id, user);
 
-  return res.json({ status: "success" });
+  return res.json({ "avatarUrl": newPath });
 }
 
 
