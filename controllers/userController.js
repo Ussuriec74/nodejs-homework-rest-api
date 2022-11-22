@@ -1,17 +1,22 @@
-const { User } = require('../models/userModel');
 const { Conflict, Unauthorized } = require('http-errors');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const gravatar = require('gravatar');
+const fs = require('fs/promises');
+const path = require('path');
+const Jimp = require('jimp');
+const { User } = require('../models/userModel');
 
 const { JWT_SECRET } = process.env;
 
 const signupUser = async (req, res, next) => {
   const { email, password } = req.body;
 
+  const url = await gravatar.url(`${email}`, {s: '100', r: 'x', d: 'retro'}, false);
   const salt = await bcrypt.genSalt();
   const hashedPassword = await bcrypt.hash(password, salt);
 
-  const user = new User({ email, password: hashedPassword });
+  const user = new User({ email, password: hashedPassword, avatarURL: url });
   try {
     await user.save();
   } catch(error) {
@@ -20,7 +25,6 @@ const signupUser = async (req, res, next) => {
     }
     throw error;
   }
-
   return res.status(201).json({
     user: {
       email: user.email,
@@ -73,9 +77,30 @@ const logoutUser = async (req, res, next) => {
   return res.sendStatus(204);
 }
 
+const cahgeAvatarUrl = async (req, res, next) => {
+
+  const resize = async() => {
+  const image = await Jimp.read(req.file.path);
+  await image.resize(250, 250);
+}
+resize();
+
+  const newPath = path.join(__dirname, "../public/avatars", `${req.user._id}${req.file.originalname}`);
+  await fs.rename(req.file.path, newPath);
+
+  const { user } = req;
+  user.avatarURL = newPath;
+
+  await User.findByIdAndUpdate(user._id, user);
+
+  return res.json({ "avatarUrl": newPath });
+}
+
+
 module.exports = {
   signupUser,
   loginUser,
   logoutUser,
   getCurrentUser,
+  cahgeAvatarUrl,
 };

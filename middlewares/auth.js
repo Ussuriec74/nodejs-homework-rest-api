@@ -13,7 +13,6 @@ const auth = async (req, res, next) => {
     try {
       const verifiedToken = jwt.verify(token, JWT_SECRET);
       const user = await User.findById(verifiedToken._id);
-
       
       if (!user) {
         next(new Unauthorized("Not authorized"));
