@@ -1,24 +1,29 @@
-const { Conflict, Unauthorized } = require('http-errors');
+const { Conflict, Unauthorized, NotFound, BadRequest } = require('http-errors');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const gravatar = require('gravatar');
 const fs = require('fs/promises');
 const path = require('path');
 const Jimp = require('jimp');
+const { nanoid } = require('nanoid');
 const { User } = require('../models/userModel');
+const { sendEmail } = require('../servises/emailServis.js');
+
 
 const { JWT_SECRET } = process.env;
 
 const signupUser = async (req, res, next) => {
   const { email, password } = req.body;
+  const verificationToken = nanoid();
 
   const url = await gravatar.url(`${email}`, {s: '100', r: 'x', d: 'retro'}, false);
   const salt = await bcrypt.genSalt();
   const hashedPassword = await bcrypt.hash(password, salt);
 
-  const user = new User({ email, password: hashedPassword, avatarURL: url });
+  const user = new User({ email, password: hashedPassword, avatarURL: url, verificationToken });
   try {
     await user.save();
+    await sendEmail({ email, token: verificationToken });
   } catch(error) {
     if (error.message.includes("E11000 duplicate key error collection")) {
       throw new Conflict("Email in use");
@@ -33,6 +38,43 @@ const signupUser = async (req, res, next) => {
   });
 }
 
+const confirm = async (req, res, next) => {
+  const { verificationToken } = req.params;
+  console.log(verificationToken);
+
+  const user = await User.findOne({
+    verificationToken: verificationToken
+  });
+  console.log("User:", user);
+  if (!user) {
+    throw new NotFound("User not found");
+  };
+  if (!user.verify) {
+    await User.findByIdAndUpdate(user._id, {
+      verify: true,
+      verificationToken: null,
+    });
+    return res.json({
+      message: "Verification successful"
+    });
+  }
+}
+
+const resendEmail = async (req, res, next) => {
+  const { email } = req.body;
+  const user = await User.findOne({ email: email });
+  if (!user) {
+    throw new NotFound("User not found");
+  };
+  if (user.verify) {
+    throw new BadRequest("Verification has already been passed");
+  };
+  await sendEmail(user.email, user.verificationToken);
+  return res.status(200).json({
+    message: "Verification email sent"
+  })
+}
+
 const loginUser = async (req, res,) => {
   const { email, password } = req.body;
 
@@ -40,6 +82,9 @@ const loginUser = async (req, res,) => {
 
   if (!user) {
     throw new Unauthorized("Email or password is wrong");
+  }
+   if (!user.verify) {
+    throw new Unauthorized("Email is not verified");
   }
   const isPasswordCorrect = await bcrypt.compare(password, user.password);
   if (!isPasswordCorrect) {
@@ -104,4 +149,6 @@ module.exports = {
   logoutUser,
   getCurrentUser,
   cahgeAvatarUrl,
+  confirm,
+  resendEmail,
 };
