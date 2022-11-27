@@ -80,9 +80,10 @@ const logoutUser = async (req, res, next) => {
 const cahgeAvatarUrl = async (req, res, next) => {
 
   const resize = async() => {
-  const image = await Jimp.read(req.file.path);
-  await image.resize(250, 250);
-}
+    const image = await Jimp.read(req.file.path);
+    await image.resize(250, 250);
+    await image.writeAsync(newPath);
+  }
 resize();
 
   const newPath = path.join(__dirname, "../public/avatars", `${req.user._id}${req.file.originalname}`);
