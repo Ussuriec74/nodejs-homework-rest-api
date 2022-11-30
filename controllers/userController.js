@@ -16,20 +16,20 @@ const signupUser = async (req, res, next) => {
   const { email, password } = req.body;
   const verificationToken = nanoid();
 
+  const verifiedUser = await User.findOne({ email: email });
+  if (verifiedUser) {
+    throw new Conflict("Email in use");
+  }
+
   const url = await gravatar.url(`${email}`, {s: '100', r: 'x', d: 'retro'}, false);
   const salt = await bcrypt.genSalt();
   const hashedPassword = await bcrypt.hash(password, salt);
 
   const user = new User({ email, password: hashedPassword, avatarURL: url, verificationToken });
-  try {
-    await user.save();
-    await sendEmail({ email, token: verificationToken });
-  } catch(error) {
-    if (error.message.includes("E11000 duplicate key error collection")) {
-      throw new Conflict("Email in use");
-    }
-    throw error;
-  }
+  
+  await user.save();
+  await sendEmail({ email, token: verificationToken });
+  
   return res.status(201).json({
     user: {
       email: user.email,
