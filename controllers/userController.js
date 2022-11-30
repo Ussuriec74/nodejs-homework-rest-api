@@ -40,12 +40,10 @@ const signupUser = async (req, res, next) => {
 
 const confirm = async (req, res, next) => {
   const { verificationToken } = req.params;
-  console.log(verificationToken);
 
   const user = await User.findOne({
     verificationToken: verificationToken
   });
-  console.log("User:", user);
   if (!user) {
     throw new NotFound("User not found");
   };

@@ -1,5 +1,5 @@
 const sgMail = require('@sendgrid/mail');
-const { SEND_GRID_KEY, PORT = 3000 } = process.env;
+const { SEND_GRID_KEY, PORT = 3000, SENDER_EMAIL } = process.env;
 
 const BASE_URL = `http://localhost:${PORT}/api`;
 
@@ -7,7 +7,7 @@ const sendEmail = async (userEmail, code) => {
   sgMail.setApiKey(SEND_GRID_KEY);
   const link = `${BASE_URL}/auth/verify/${code}`;
   const emailBody = {
-    from: "semko74@meta.ua",
+    from: SENDER_EMAIL,
     to: userEmail,
     subject: "Please confirm your email",
     html: `<h3>Click on this link to confirm registration ${link}</h3>`,
